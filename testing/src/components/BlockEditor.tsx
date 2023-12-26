@@ -1,4 +1,4 @@
-import { BlockEditorParams, PositionedBlock, Block } from "../utils/Definitions";
+import { BlockEditorParams, PositionedBlock, Block, isPositionedBlock } from "../utils/Definitions";
 import { IfBlock } from "./blocks/Blocks";
 
 export default function BlockEditor({blocksData, blockSetter} : BlockEditorParams) {
@@ -11,9 +11,12 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
         let seqeunce = [];
         while (curr !== null) {
             if (curr.blockType === 'IF') {
-                seqeunce.push(<IfBlock x={x} y={y} code={curr.code}/>);
+                seqeunce.push(<IfBlock 
+                                id={curr.id} blocks={blocksData} blockSetter={blockSetter}
+                                isParent={isPositionedBlock(curr) ? true : false}
+                                x={x} y={y} code={curr.code}/>);
             }
-            y += 24;
+            y += 16;
             curr = curr.next;
         }
         blocksDisplay.push(
