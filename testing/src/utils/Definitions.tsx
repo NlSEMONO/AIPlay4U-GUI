@@ -1,11 +1,16 @@
 export interface PositionedBlock {
     x: number,
     y: number, 
-    blockType: string
+    blockType: string,
+    next: Block | null,
+    body: Block | null,
+    code: string
 }
 
 export interface Block {
-    blockType: string
+    blockType: string,
+    next: Block,
+    code: string
 }
 
 export interface SidebarParams {
