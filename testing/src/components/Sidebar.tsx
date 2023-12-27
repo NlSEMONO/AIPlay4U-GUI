@@ -6,6 +6,9 @@ import { SidebarParams, PositionedBlock, Block } from "../utils/Definitions";
 //   the drawing area.
 export default function Sidebar({blocks, blockSetter} : SidebarParams) {
     const [ids, setIds] = useState<number>(0);
+
+    // handleClick(itm) adds a block of type itm to the back of the current state
+    //   of blocks.
     const handleClick: (a: string) => void = (itm: string) => {
         const copy = copyBlocks(blocks);
         let added: number = 1;

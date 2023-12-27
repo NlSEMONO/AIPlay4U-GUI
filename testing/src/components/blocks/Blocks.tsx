@@ -2,6 +2,8 @@ import { XOFFSET } from "../../utils/Constants";
 import { BlockParams, PositionedBlock, Block } from "../../utils/Definitions";
 import { useState } from 'react';
 
+// getBlockById(id, blocks) returns the block associated with a given id.
+// time: O(n)
 const getBlockById: (id: number, blocks: Array<PositionedBlock | Block >) 
                         => PositionedBlock | Block | null = (id, blocks) => {
     for (let i = 0; i < blocks.length; ++i) {
@@ -18,6 +20,8 @@ const getBlockById: (id: number, blocks: Array<PositionedBlock | Block >)
     return null;
 }
 
+// cloneBlocks(blocks) returns a clone of blocks.
+// time: O(n)
 const cloneBlocks: (blocks: Array<PositionedBlock>) 
                         => Array<PositionedBlock> = (blocks) => {
     let blocksSoFar = [];
@@ -27,6 +31,9 @@ const cloneBlocks: (blocks: Array<PositionedBlock>)
     return blocksSoFar;
 }
 
+// cloneBlocks(id, newBlock, blocks) returns a clone of blocks where the block 
+//    associated with id is replaced with newBlock.
+// time: O(n)
 const replaceBlockById: (id: number, newBlock: Block | PositionedBlock, blocks: Array<PositionedBlock | Block >) => void = (id, newBlock, blocks) => {
     for (let i = 0; i < blocks.length; ++i) {
         let curr: null | PositionedBlock | Block = blocks[i];
@@ -49,6 +56,9 @@ const replaceBlockById: (id: number, newBlock: Block | PositionedBlock, blocks: 
     }
 }
 
+// IfBlock(id, isParent, blocks, blockSetter, x, y, code) returns a component
+//    representing an if statement. Note that (x, y) are relative to the sequence
+//    div the IfBlock is stored in.
 export const IfBlock = ({id, isParent, blocks, blockSetter, x, y, code} : BlockParams) => {
     const [text, setText] = useState<string>(code);
     const [dragged, setDragged] = useState<boolean>(false);

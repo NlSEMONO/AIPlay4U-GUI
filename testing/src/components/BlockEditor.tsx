@@ -1,10 +1,15 @@
 import { BlockEditorParams, PositionedBlock, Block, isPositionedBlock } from "../utils/Definitions";
 import { EndBlock, IfBlock } from "./blocks/Blocks";
 
+// BlockEditor(blocksData, blockSetter) renders the playground in which blocks
+//   are generated in.
 export default function BlockEditor({blocksData, blockSetter} : BlockEditorParams) {
     const classes = "ml-96 px-8 py-4";
     const blocksDisplay = [];
 
+    // createBlock(depth, y, block) generate a sequence of blocks given the head
+    //   of a sequence of blocks.
+    // time: O(n)
     const createBlock: (depth: number, y: number, block: PositionedBlock | Block) => Array<any> = (depth, y, block) => {
         let curr: PositionedBlock | Block | null = block;
         let prev: PositionedBlock | Block | null = null;
@@ -32,6 +37,7 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
         }
         return sequence;
     }
+
     for (let i = 0; i < blocksData.length; ++i) {
         let x = blocksData[i].x;
         let y = blocksData[i].y;
