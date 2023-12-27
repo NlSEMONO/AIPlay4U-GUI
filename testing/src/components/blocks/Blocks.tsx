@@ -92,12 +92,20 @@ export const IfBlock = ({id, isParent, blocks, blockSetter, x, y, code} : BlockP
     }
 
     return (
-        <div className={blockClasses} style={{top: y, left: 0, margin: 0}} 
+        <div className={blockClasses} style={{top: y, left: x, margin: 0}} 
             draggable onDrag={handleDrag} onDrop={event => setDragged(false)}>
             <h1> IF </h1>
             <input type="text" className={inputClasses} onChange={(e) => setText(e.target.value)} value={text}/>
         </div>
     );
+}
+
+export const EndBlock = ({id, isParent, blocks, blockSetter, x, y, code} : BlockParams) => {
+    const blockClasses = "bg-if w-64 h-16 px-4 relative m-0 rounded flex flex-row justify-around";
+
+    return <div className={blockClasses} style={{top: y, left: x, margin: 0}}>  
+            <h1> END </h1> 
+            </div>
 }
 
 // export const EndIfBlock(id, isParent)

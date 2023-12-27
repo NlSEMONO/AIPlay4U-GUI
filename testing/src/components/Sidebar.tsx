@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { blockTypes } from "../utils/Constants";
-import { SidebarParams, PositionedBlock } from "../utils/Definitions";
+import { SidebarParams, PositionedBlock, Block } from "../utils/Definitions";
 
 // Sidebar(blocks, blockSetter) returns the sidebar used to add new blocks to
 //   the drawing area.
@@ -8,14 +8,21 @@ export default function Sidebar({blocks, blockSetter} : SidebarParams) {
     const [ids, setIds] = useState<number>(0);
     const handleClick: (a: string) => void = (itm: string) => {
         const copy = copyBlocks(blocks);
+        let added: number = 1;
         let newX: number = (copy.length === 0) ? 0 : copy[copy.length- 1].x + 96;
         let newBlock: PositionedBlock = {
             id: ids, x: newX, y: 0, blockType: itm, next: null, code: "", body: null
         };
-
+        if (itm === 'IF' || itm === 'WHILE' || itm === 'FOR') {
+            let endBlock: Block = {
+                id: ids + 1, blockType: 'END', next: null, code: "", body: null
+            }
+            newBlock.next = endBlock;
+            ++added;
+        }
         copy.push(newBlock);
         blockSetter(copy);
-        setIds(ids + 1);
+        setIds(ids + added);
     }
 
     const createBlockButtons = blockTypes.map((itm) => {
