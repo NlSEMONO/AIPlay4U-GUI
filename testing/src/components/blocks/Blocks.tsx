@@ -1,5 +1,6 @@
+import { XOFFSET } from "../../utils/Constants";
 import { BlockParams, PositionedBlock, Block } from "../../utils/Definitions";
-import { useState} from 'react';
+import { useState } from 'react';
 
 const getBlockById: (id: number, blocks: Array<PositionedBlock | Block >) 
                         => PositionedBlock | Block | null = (id, blocks) => {
@@ -49,35 +50,50 @@ const replaceBlockById: (id: number, newBlock: Block | PositionedBlock, blocks: 
 }
 
 export const IfBlock = ({id, isParent, blocks, blockSetter, x, y, code} : BlockParams) => {
-    const [text, setText] = useState(code);
+    const [text, setText] = useState<string>(code);
+    const [dragged, setDragged] = useState<boolean>(false);
+    const [clickOffset, setClickOffset] = useState<Array<number>>([0, 0]);
     const inputClasses = "bg-white text-black w-32 h-8 my-auto p-2 rounded";
     const blockClasses = "bg-if w-64 h-16 px-4 relative m-0 rounded flex flex-row justify-around";
     const minDiff = 30; // minimum radius to disconnect connected blocks
 
-    const handleDrag: (event: React.DragEvent) => void = (event) => {
+    const handleDrag: (event: React.DragEvent) => void = (event) => { 
+        if (event.pageX === 0 || 0 >= event.pageX - (XOFFSET * 4)) {
+            console.log("DROPPPED!");
+            setDragged(false);
+            return;
+        }
+
         const block = getBlockById(id, blocks);
         if (!block) return;
         
         let newBlock: PositionedBlock | null = null;
         if (isParent) {
             let newBlocks = cloneBlocks(blocks);
+            if (!dragged) setClickOffset([event.pageX - (block as PositionedBlock).x, event.pageY - y]);
+            let newX: number = (dragged) ? (event.pageX - clickOffset[0]) : x;
+            let newY: number = (dragged) ? (event.pageY - clickOffset[1]) : y;
             newBlock = {
-                id: id, x: event.clientX, y: event.clientY, code: code, next: null, body: block.body, blockType: block.blockType
+                id: id, x: newX, y: newY, 
+                code: code, next: null, body: block.body, 
+                blockType: block.blockType
             }
             replaceBlockById(id, newBlock, newBlocks);
             blockSetter(newBlocks);
-        }
-        if (newBlock !== null)  {
-            console.log(newBlock.x + " " + newBlock.y);
+            setDragged(true);
         }
         else if (minDiff <= Math.abs(x - event.clientX) || minDiff <= Math.abs(y - event.clientY)) {
-            
+
+        }
+        if (newBlock !== null)  {
+            console.log(event.pageX + " " + event.pageY);
+            console.log(newBlock.x + " " + newBlock.y);
         }
     }
 
     return (
-        <div className={blockClasses} style={{top: y * 4, left: x * 4, margin: 0}} 
-            draggable onDrag={handleDrag} onDrop={event => console.log(event)}>
+        <div className={blockClasses} style={{top: y, left: 0, margin: 0}} 
+            draggable onDrag={handleDrag} onDrop={event => setDragged(false)}>
             <h1> IF </h1>
             <input type="text" className={inputClasses} onChange={(e) => setText(e.target.value)} value={text}/>
         </div>

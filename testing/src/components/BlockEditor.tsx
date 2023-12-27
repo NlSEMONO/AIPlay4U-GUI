@@ -14,13 +14,13 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
                 seqeunce.push(<IfBlock 
                                 id={curr.id} blocks={blocksData} blockSetter={blockSetter}
                                 isParent={isPositionedBlock(curr) ? true : false}
-                                x={x} y={y} code={curr.code}/>);
+                                x={0} y={y} code={curr.code}/>);
             }
             y += 16;
             curr = curr.next;
         }
         blocksDisplay.push(
-            <div className="relative m-auto w-fit" style={{top: 0, left: x * 4, margin: 0}}>
+            <div className="relative m-auto w-fit" style={{top: 0, left: x, margin: 0}}>
                 {seqeunce}
             </div>
         );
