@@ -15,23 +15,24 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
         let prev: PositionedBlock | Block | null = null;
         let sequence: Array<any> = [];
         let xCoord = depth * 16;
+        let currY = 0;
         while (curr !== null) {
             if (curr.blockType === 'IF') {
                 sequence.push(<IfBlock 
                                 id={curr.id} blocks={blocksData} blockSetter={blockSetter}
                                 isParent={isPositionedBlock(curr) ? true : false}
-                                x={xCoord} y={y} code={curr.code}/>);
+                                x={xCoord} y={currY} code={curr.code}/>);
             } 
             else if (curr.blockType === 'END') {
                 sequence.push(<EndBlock
                                 id={curr.id} blocks={blocksData} blockSetter={blockSetter}
                                 isParent={isPositionedBlock(curr) ? true : false}
-                                x={xCoord} y={y} code={curr.code}/>);
+                                x={xCoord} y={currY} code={curr.code}/>);
             }
             let bodyBlocks = [];
-            if (curr.body !== null) bodyBlocks = createBlock(depth + 1, y + 16, curr.body);
+            if (curr.body !== null) bodyBlocks = createBlock(depth + 1, currY + 16, curr.body);
             sequence.concat(bodyBlocks);
-            y += 16 + bodyBlocks.length * 16;
+            currY += 16 + bodyBlocks.length * 16;
             prev = curr;
             curr = curr.next;
         }
@@ -42,10 +43,10 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
         let x = blocksData[i].x;
         let y = blocksData[i].y;
         let curr: PositionedBlock = blocksData[i];
-        let sequence = createBlock(0, y, curr);
+        let sequence = createBlock(0, 0, curr);
         
         blocksDisplay.push(
-            <div className="relative m-auto w-fit" style={{top: 0, left: x, margin: 0}}>
+            <div className="relative m-auto w-fit" style={{top: y, left: x, margin: 0}}>
                 {sequence}
             </div>
         );
