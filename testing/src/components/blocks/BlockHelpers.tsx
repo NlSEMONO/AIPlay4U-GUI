@@ -78,20 +78,19 @@ const tryFindTarget: (x: number, y: number, depth: number, ySoFar: number, pX: n
     while (curr !== null) {
         let effectiveX = XOFFSET * 4 + pX + depth * DEPTHINC;
         let effectiveY = pY + ySoFar;
-        console.log('128904182390481294812934');
-        console.log("EFF X: " + effectiveX);
-        console.log(`EFF Y ${effectiveY}`);
+        // console.log('128904182390481294812934');
+        // console.log("EFF X: " + effectiveX);
+        // console.log(`EFF Y ${effectiveY}`);
         
         if (curr.id !== draggedId && effectiveX <= x && x <= effectiveX + BWIDTH * 4 && effectiveY <= y && y <= effectiveY + BHEIGHT * 4) {
             return curr;
         }
         if (curr.body !== null) {
             let result = tryFindTarget(x, y, depth + 1, ySoFar + BHEIGHT * 4 + 16, pX, pY, draggedId, curr.body);
-            console.log(result);
             if ((result as Block).blockType !== undefined) return result;
             else ySoFar = result as number;
         }
-        ySoFar += 16;
+        else ySoFar += 16 + BHEIGHT * 4;
         curr = curr.next;
     }
     return ySoFar;
@@ -205,10 +204,11 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
     }
 
     const onDrop: (event: React.DragEvent) => void = (event) => {
+        console.log("FFFFFFFFFFFFFF");
         let newBlocks = cloneBlocks(blocks);
         let draggedBlock = getBlockById(draggedId, newBlocks);
         if (draggedBlock === null) return;
-        if (draggedBlock.blockType === 'END') return; // can't drop end block into another block
+        console.log(draggedBlock);
 
         let block: PotentialBlock = getTarget(event.pageX, event.pageY, draggedId, newBlocks);
         if (block === null) return;
@@ -216,37 +216,42 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
         for (let i = 0; i < newBlocks.length; ++i) {
             if (id !== newBlocks[i].id) newNewBlocks.push(removeBlockById(draggedId, blocks[i]) as PositionedBlock);
         }
+        let newBlock: Block = {
+            id: draggedBlock.id, 
+            next: draggedBlock.next, 
+            body: draggedBlock.body,
+            code: draggedBlock.code,
+            blockType: draggedBlock.blockType
+        }
         if (block.blockType === 'IF' || block.blockType === 'WHILE' || block.blockType === 'FOR') {
-            console.log('hi');
-            let newBlock: Block = {
-                id: draggedBlock.id, 
-                next: draggedBlock.next, 
-                body: draggedBlock.body,
-                code: draggedBlock.code,
-                blockType: draggedBlock.blockType
-            }
+            // console.log('hi');
+            // console.log(block);
             if (block.body === null) {
                 block.body = newBlock;
             }
             else {
-                let curr: null | PositionedBlock | Block = newBlock;
+                let curr: PotentialBlock = newBlock;
                 let prev = newBlock;
                 while (curr !== null) {
                     prev = curr;
                     curr = curr.next;
-                    console.log(2);
-
                 }
                 prev.next = block.body;
                 block.body = newBlock;
             }
-            blockSetter(newNewBlocks);
-            
         }
-        // else {
-            
-        // }
-
+        else {
+            console.log('b')
+            let curr: PotentialBlock = newBlock;
+            let prev = newBlock;
+            while (curr !== null) {
+                prev = curr;
+                curr = curr.next;
+            }
+            prev.next = block.next;
+            block.next = newBlock;
+        }
+        blockSetter(newNewBlocks);
         setDraggedId(-1);
     }
 
