@@ -1,9 +1,12 @@
-import { BlockEditorParams, PositionedBlock, Block, isPositionedBlock } from "../utils/Definitions";
+import { DEPTHINC } from "../utils/Constants";
+import { BlockEditorParams, PositionedBlock, Block, isPositionedBlock, BlockParams } from "../utils/Definitions";
 import { EndBlock, IfBlock } from "./blocks/Blocks";
+import {useState} from 'react';
 
 // BlockEditor(blocksData, blockSetter) renders the playground in which blocks
 //   are generated in.
 export default function BlockEditor({blocksData, blockSetter} : BlockEditorParams) {
+    const [beingDraggged, setBeingDragged]  = useState(-1);
     const classes = "ml-96 px-8 py-4";
     const blocksDisplay = [];
 
@@ -12,30 +15,32 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
     // time: O(n)
     const createBlock: (depth: number, y: number, block: PositionedBlock | Block) => Array<any> = (depth, y, block) => {
         let curr: PositionedBlock | Block | null = block;
-        let prev: PositionedBlock | Block | null = null;
         let sequence: Array<any> = [];
-        let xCoord = depth * 16;
+        let xCoord = depth * DEPTHINC;
         let currY = y;
         while (curr !== null) {
+            let params: BlockParams = {
+                id: curr.id, blocks: blocksData, blockSetter: blockSetter,
+                isParent: isPositionedBlock(curr) ? true : false,
+                x: xCoord, y: currY, code: curr.code, 
+                draggedId: beingDraggged, setDraggedId: setBeingDragged
+            }
             if (curr.blockType === 'IF') {
-                sequence.push(<IfBlock 
-                                id={curr.id} blocks={blocksData} blockSetter={blockSetter}
-                                isParent={isPositionedBlock(curr) ? true : false}
-                                x={xCoord} y={currY} code={curr.code}/>);
+                sequence.push(<IfBlock {... params} />);
             } 
             else if (curr.blockType === 'END') {
-                sequence.push(<EndBlock
-                                id={curr.id} blocks={blocksData} blockSetter={blockSetter}
-                                isParent={isPositionedBlock(curr) ? true : false}
-                                x={xCoord} y={currY} code={curr.code}/>);
+                sequence.push(<EndBlock {... params} />);
             }
             let bodyBlocks = [];
-            if (curr.body !== null) bodyBlocks = createBlock(depth + 1, currY + 16, curr.body);
-            sequence.concat(bodyBlocks);
+            if (curr.body !== null) {
+                bodyBlocks = createBlock(depth + 1, currY + 16, curr.body);
+                console.log(bodyBlocks);
+            }
+            sequence = sequence.concat(bodyBlocks);
             currY += 16 + bodyBlocks.length * 16;
-            prev = curr;
             curr = curr.next;
         }
+        console.log(sequence);
         return sequence;
     }
 

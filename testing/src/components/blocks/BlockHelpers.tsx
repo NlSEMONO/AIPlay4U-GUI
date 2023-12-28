@@ -1,13 +1,13 @@
-import { XOFFSET } from "../../utils/Constants";
-import { BlockParams, PositionedBlock, Block } from "../../utils/Definitions";
+import { XOFFSET, BHEIGHT, BWIDTH, DEPTHINC } from "../../utils/Constants";
+import { BlockParams, PositionedBlock, Block, PotentialBlock, isPositionedBlock } from "../../utils/Definitions";
 import { useState } from 'react';
 
 // getBlockById(id, blocks) returns the block associated with a given id.
 // time: O(n)
 const getBlockById: (id: number, blocks: Array<PositionedBlock | Block >) 
-                        => PositionedBlock | Block | null = (id, blocks) => {
+                                        => PotentialBlock = (id, blocks) => {
     for (let i = 0; i < blocks.length; ++i) {
-        let curr: null | PositionedBlock | Block = blocks[i];
+        let curr: PotentialBlock = blocks[i];
         while (curr !== null) {
             if (curr.id === id) return curr;
             if (curr.body !== null) {
@@ -36,8 +36,8 @@ const cloneBlocks: (blocks: Array<PositionedBlock>)
 // time: O(n)
 const replaceBlockById: (id: number, newBlock: Block | PositionedBlock | null, blocks: Array<PositionedBlock | Block >) => void = (id, newBlock, blocks) => {
     for (let i = 0; i < blocks.length; ++i) {
-        let curr: null | PositionedBlock | Block = blocks[i];
-        let prev: null | PositionedBlock | Block = null;
+        let curr: PotentialBlock = blocks[i];
+        let prev: PotentialBlock = null;
         while (curr !== null) {
             if (curr.id === id) {
                 if (prev === null && newBlock !== null) {
@@ -67,26 +67,74 @@ const getParent: (id: number, blocks: Array<PositionedBlock>) =>  PositionedBloc
     return null;
 }
 
-// getLength(block) returns how many times
+// tryFindTarget(x, y, depth, ySoFar, pX, pY, draggedId, block) returns which 
+//   block a pair of (x, y) is within that isn't draggedId, based on depth, ySoFar
+//   and the parent's (x, y) coordinates. Returns null if such a block doesn't
+//   exist.
 // time: O(n)
-// const getPosn: (block: PositionedBlock | Block) => number = (block) => {
-//     let sum: number = 0;
-//     let curr: PositionedBlock | Block | null = block;
-//     while (curr !== null) {
-//         let bodyLen = (curr.body) ? getLength(curr.body) : 0;
-//         sum += 1 + bodyLen;
-//         curr = curr.next;
-//     }
-//     return sum;
-// }
+const tryFindTarget: (x: number, y: number, depth: number, ySoFar: number, pX: number, pY: number, draggedId: number, block: PositionedBlock | Block) 
+                                                                            => PositionedBlock | Block | number = (x, y, depth, ySoFar, pX, pY, draggedId, block) => {
+    let curr: PotentialBlock = block;
+    while (curr !== null) {
+        let effectiveX = XOFFSET * 4 + pX + depth * DEPTHINC;
+        let effectiveY = pY + ySoFar;
+        console.log('128904182390481294812934');
+        console.log("EFF X: " + effectiveX);
+        console.log(`EFF Y ${effectiveY}`);
+        
+        if (effectiveX <= x && x <= effectiveX + BWIDTH * 4 && effectiveY <= y && y <= effectiveY + BHEIGHT * 4) {
+            return curr;
+        }
+        if (curr.body !== null) {
+            let result = tryFindTarget(x, y, depth + 1, ySoFar + 16, pX, pY, draggedId, curr.body);
+            if ((result as Block).blockType !== undefined) return result;
+            else ySoFar = result as number;
+        }
+        ySoFar += 16;
+        curr = curr.next;
+    }
+    return ySoFar;
+}
 
-export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code} : BlockParams) => {
+
+// getTarget(x, y, draggedId, blocks) returns which block a pair of (x, y) is 
+//   within that isn't draggedId.
+// time: O(n)
+const getTarget: (x: number, y: number, draggedId: number, blocks: Array<PositionedBlock>) 
+                                                    => PotentialBlock = (x, y, draggedId, blocks) => {
+    console.log(`TGT X:${x}`);
+    console.log(`TGT Y:${y}`);
+    for (let i = 0; i < blocks.length; ++i) {
+        let result = tryFindTarget(x, y, 0, 0, blocks[i].x, blocks[i].y, draggedId, blocks[i]);
+        if ((result as Block).blockType !== undefined) return isPositionedBlock(result) ? result as PositionedBlock : result as Block;
+    }
+    return null;
+}
+
+// removeBlockById(id, block) removes the block represented by id (if its nested
+//   within block). (will not work if the block is the first node)
+// time: O(n)
+const removeBlockById: (id: number, block: PositionedBlock | Block) => PositionedBlock | Block = (id, block) => {
+    let curr: PotentialBlock = block.next;
+    let prev: PotentialBlock = block;
+    while (curr !== null) {
+        if (id === curr.id) {
+            prev.next = curr.next;
+        }
+        prev = curr;
+        curr = curr.next;
+    }
+    return block;
+}
+
+export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, draggedId, setDraggedId} : BlockParams) => {
     const [text, setText] = useState<string>(code);
     const [dragged, setDragged] = useState<boolean>(false);
     const [clickOffset, setClickOffset] = useState<Array<number>>([0, 0]);
     const minDiff = 30; // minimum radius to disconnect connected blocks
 
     const handleDrag: (event: React.DragEvent) => void = (event) => { 
+        // console.log(event.pageX + " " + event.pageY);
         if (event.pageX === 0 || 0 > event.pageX - (XOFFSET * 4)) {
             console.log("DROPPPED!");
             setDragged(false);
@@ -96,6 +144,7 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code} : Block
         const block = getBlockById(id, blocks);
         if (!block) return;
         
+        setDraggedId(id);
         let newBlock: PositionedBlock | null = null;
         let newBlocks = cloneBlocks(blocks);
         // current block is a PositionedBlock block
@@ -117,11 +166,8 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code} : Block
         let parent: PositionedBlock = (getParent(id, blocks) as PositionedBlock); // guaranteed to return something if the block itself isn't a parent
         let effectiveX: number = parent.x + x;
         let effectiveY: number = parent.y + y;
-        console.log("*************************************");
         if (!dragged) {
             let newOffset: Array<number> = [event.pageX - effectiveX, event.pageY - effectiveY];
-            console.log(newOffset[0]);
-            console.log(newOffset[1]);
             setClickOffset(newOffset);
         }
 
@@ -151,6 +197,56 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code} : Block
         }
     }
 
+    const onDragOver: (event: React.DragEvent) => void = (event) => {
+        event.preventDefault();
+    }
+
+    const onDrop: (event: React.DragEvent) => void = (event) => {
+        let newBlocks = cloneBlocks(blocks);
+        let draggedBlock = getBlockById(draggedId, newBlocks);
+        if (draggedBlock === null) return;
+        if (draggedBlock.blockType === 'END') return; // can't drop end block into another block
+
+        let block: PotentialBlock = getTarget(event.pageX, event.pageY, draggedId, newBlocks);
+        if (block === null) return;
+        let newNewBlocks = [];
+        for (let i = 0; i < newBlocks.length; ++i) {
+            if (id !== newBlocks[i].id) newNewBlocks.push(removeBlockById(draggedId, blocks[i]) as PositionedBlock);
+        }
+        if (block.blockType === 'IF' || block.blockType === 'WHILE' || block.blockType === 'FOR') {
+            console.log('hi');
+            let newBlock: Block = {
+                id: draggedBlock.id, 
+                next: draggedBlock.next, 
+                body: draggedBlock.body,
+                code: draggedBlock.code,
+                blockType: draggedBlock.blockType
+            }
+            if (block.body === null) {
+                block.body = newBlock;
+            }
+            else {
+                let curr: null | PositionedBlock | Block = newBlock;
+                let prev = newBlock;
+                while (curr !== null) {
+                    prev = curr;
+                    curr = curr.next;
+                    console.log(2);
+
+                }
+                prev.next = block.body;
+                block.body = newBlock;
+            }
+            blockSetter(newNewBlocks);
+            
+        }
+        // else {
+            
+        // }
+
+        setDraggedId(-1);
+    }
+
     const handleClick: (e: React.ChangeEvent<HTMLInputElement>) => void = 
                                                 e => setText(e.target.value);
 
@@ -158,6 +254,8 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code} : Block
         {
             code: text,
             onDrag: handleDrag, 
+            onDragOver: onDragOver,
+            onDrop: onDrop,
             onChange: handleClick,
         }
     );

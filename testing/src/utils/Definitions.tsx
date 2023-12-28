@@ -17,6 +17,8 @@ export interface Block {
     code: string
 }
 
+export type PotentialBlock = Block | null | PositionedBlock;
+
 export interface BlockParams {
     id: number, 
     isParent: boolean,
@@ -24,7 +26,9 @@ export interface BlockParams {
     blockSetter: (blocks: Array<PositionedBlock>) => void,
     x: number, 
     y: number,
-    code: string
+    code: string, 
+    draggedId: number,
+    setDraggedId: (n: number) => void,
 }
 
 export interface SidebarParams {
