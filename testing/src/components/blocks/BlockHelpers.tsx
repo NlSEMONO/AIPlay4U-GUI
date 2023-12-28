@@ -82,11 +82,12 @@ const tryFindTarget: (x: number, y: number, depth: number, ySoFar: number, pX: n
         console.log("EFF X: " + effectiveX);
         console.log(`EFF Y ${effectiveY}`);
         
-        if (effectiveX <= x && x <= effectiveX + BWIDTH * 4 && effectiveY <= y && y <= effectiveY + BHEIGHT * 4) {
+        if (curr.id !== draggedId && effectiveX <= x && x <= effectiveX + BWIDTH * 4 && effectiveY <= y && y <= effectiveY + BHEIGHT * 4) {
             return curr;
         }
         if (curr.body !== null) {
-            let result = tryFindTarget(x, y, depth + 1, ySoFar + 16, pX, pY, draggedId, curr.body);
+            let result = tryFindTarget(x, y, depth + 1, ySoFar + BHEIGHT * 4 + 16, pX, pY, draggedId, curr.body);
+            console.log(result);
             if ((result as Block).blockType !== undefined) return result;
             else ySoFar = result as number;
         }
@@ -104,6 +105,8 @@ const getTarget: (x: number, y: number, draggedId: number, blocks: Array<Positio
                                                     => PotentialBlock = (x, y, draggedId, blocks) => {
     console.log(`TGT X:${x}`);
     console.log(`TGT Y:${y}`);
+    console.log(`DRG ID:${draggedId}`);
+    console.log(blocks);
     for (let i = 0; i < blocks.length; ++i) {
         let result = tryFindTarget(x, y, 0, 0, blocks[i].x, blocks[i].y, draggedId, blocks[i]);
         if ((result as Block).blockType !== undefined) return isPositionedBlock(result) ? result as PositionedBlock : result as Block;
