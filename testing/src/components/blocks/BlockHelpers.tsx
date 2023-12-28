@@ -34,19 +34,19 @@ const cloneBlocks: (blocks: Array<PositionedBlock>)
 // cloneBlocks(id, newBlock, blocks) returns a clone of blocks where the block 
 //    associated with id is replaced with newBlock.
 // time: O(n)
-const replaceBlockById: (id: number, newBlock: Block | PositionedBlock, blocks: Array<PositionedBlock | Block >) => void = (id, newBlock, blocks) => {
+const replaceBlockById: (id: number, newBlock: Block | PositionedBlock | null, blocks: Array<PositionedBlock | Block >) => void = (id, newBlock, blocks) => {
     for (let i = 0; i < blocks.length; ++i) {
         let curr: null | PositionedBlock | Block = blocks[i];
         let prev: null | PositionedBlock | Block = null;
         while (curr !== null) {
             if (curr.id === id) {
-                if (prev === null) {
+                if (prev === null && newBlock !== null) {
                     newBlock.next = blocks[i].next;
                     blocks[i] = newBlock;
                 }
                 else {
-                    newBlock.next = curr.next;
-                    prev.next = newBlock;
+                    if (newBlock !== null) newBlock.next = curr.next;
+                    if (prev !== null) prev.next = newBlock;
                 }
             }
             if (curr.body !== null) replaceBlockById(id, newBlock, [curr.body]);
@@ -128,7 +128,7 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code} : Block
         // edge case -- trying to move end (you have to move parent in this case)
         if (block.blockType === 'END') {
             let newParent: PositionedBlock;
-            let newX: number = (dragged) ? event.pageX - x -clickOffset[0] : parent.x;
+            let newX: number = (dragged) ? event.pageX - x - clickOffset[0] : parent.x;
             let newY: number = (dragged) ? event.pageY - y - clickOffset[1] : parent.y;
             newParent = {
                 id: parent.id, x: newX, y: newY, 
@@ -140,13 +140,15 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code} : Block
             setDragged(true);
         }
         // move out of the parent block
-        else if (minDiff <= Math.abs(x - event.clientX) || minDiff <= Math.abs(y - event.clientY)) {
-            
+        else if (minDiff <= Math.abs(effectiveX - event.clientX) || minDiff <= Math.abs(effectiveY - event.clientY)) {
+            replaceBlockById(id, null, newBlocks);
+            newBlock = {
+                id: id, x: effectiveX, y: effectiveY, 
+                code: code, next: block.next, body: block.body, 
+                blockType: block.blockType
+            }
+            newBlocks.push(newBlock);
         }
-        // if (newBlock !== null)  {
-        //     console.log(event.pageX + " " + event.pageY);
-        //     console.log(newBlock.x + " " + newBlock.y);
-        // }
     }
 
     const handleClick: (e: React.ChangeEvent<HTMLInputElement>) => void = 

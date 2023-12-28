@@ -15,7 +15,7 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
         let prev: PositionedBlock | Block | null = null;
         let sequence: Array<any> = [];
         let xCoord = depth * 16;
-        let currY = 0;
+        let currY = y;
         while (curr !== null) {
             if (curr.blockType === 'IF') {
                 sequence.push(<IfBlock 

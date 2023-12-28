@@ -1,6 +1,4 @@
-import { XOFFSET } from "../../utils/Constants";
-import { BlockParams, PositionedBlock, Block } from "../../utils/Definitions";
-import { useState } from 'react';
+import { BlockParams } from "../../utils/Definitions";
 import { useBlock } from "./BlockHelpers";
 
 // IfBlock(id, isParent, blocks, blockSetter, x, y, code) returns a component
@@ -19,14 +17,12 @@ export const IfBlock = ({id, isParent, blocks, blockSetter, x, y, code} : BlockP
         );
 }
 
-
-
 export const EndBlock = ({id, isParent, blocks, blockSetter, x, y, code} : BlockParams) => {
     const blockClasses = "bg-if w-64 h-16 px-4 relative m-0 rounded flex flex-row justify-around";
-    const {code: text, onChange, onDrag} = useBlock({id, isParent, blocks, blockSetter, x, y, code});
-    
+    const stuff = useBlock({id, isParent, blocks, blockSetter, x, y, code});
+
     return (<div className={blockClasses} style={{top: y, left: x, margin: 0}} 
-                draggable onDrag={onDrag}>
+                draggable onDrag={stuff['onDrag']}>
                 <h1> END </h1> 
             </div>);
 }
