@@ -78,17 +78,17 @@ const tryFindTarget: (x: number, y: number, depth: number, ySoFar: number, pX: n
     while (curr !== null) {
         let effectiveX = XOFFSET * 4 + pX + depth * DEPTHINC;
         let effectiveY = pY + ySoFar;
-        // console.log('128904182390481294812934');
-        // console.log("EFF X: " + effectiveX);
-        // console.log(`EFF Y ${effectiveY}`);
+        console.log('128904182390481294812934');
+        console.log("EFF X: " + effectiveX);
+        console.log(`EFF Y ${effectiveY}`);
         
         if (curr.id !== draggedId && effectiveX <= x && x <= effectiveX + BWIDTH * 4 && effectiveY <= y && y <= effectiveY + BHEIGHT * 4) {
             return curr;
         }
         if (curr.body !== null) {
             let result = tryFindTarget(x, y, depth + 1, ySoFar + BHEIGHT * 4 + 16, pX, pY, draggedId, curr.body);
-            if ((result as Block).blockType !== undefined) return result;
-            else ySoFar = result as number;
+            if (typeof(result) === "number") return ySoFar = result as number;
+            else return result;
         }
         else ySoFar += 16 + BHEIGHT * 4;
         curr = curr.next;
@@ -108,7 +108,7 @@ const getTarget: (x: number, y: number, draggedId: number, blocks: Array<Positio
     console.log(blocks);
     for (let i = 0; i < blocks.length; ++i) {
         let result = tryFindTarget(x, y, 0, 0, blocks[i].x, blocks[i].y, draggedId, blocks[i]);
-        if ((result as Block).blockType !== undefined) return isPositionedBlock(result) ? result as PositionedBlock : result as Block;
+        if (typeof(result) !== "number") return result;
     }
     return null;
 }
@@ -200,6 +200,7 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
         // move out of the parent block
         else if (minDiff <= Math.abs(effectiveX - event.clientX) || minDiff <= Math.abs(effectiveY - event.clientY)) {
             newBlocks = [];
+            console.log(block);
             for (let i = 0; i < blocks.length; ++i) {
                 let result: PotentialBlock = removeBlockById(id, blocks[i]);
                 if (result !== null) newBlocks.push(result as PositionedBlock);
@@ -207,10 +208,11 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
             console.log(newBlocks);
             // for (let i = 0; i < newBlocks.length; ++i) if (newBlocks[i].id === id) return;
             newBlock = {
-                id: id, x: effectiveX, y: effectiveY, 
+                id: id, x: effectiveX + 72, y: effectiveY, 
                 code: code, next: block.next, body: block.body, 
                 blockType: block.blockType
             }
+            console.log(newBlock);
             newBlocks.push(newBlock);
             console.log(newBlocks);
             blockSetter(newBlocks);
@@ -224,19 +226,19 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
     const onDrop: (event: React.DragEvent) => void = (event) => {
         // console.log("FFFFFFFFFFFFFF");
         let newBlocks = cloneBlocks(blocks);
-        let draggedBlock = getBlockById(draggedId, newBlocks);
+        let draggedBlock = getBlockById(id, blocks);
         if (draggedBlock === null) return;
         console.log(draggedBlock);
+        console.log(newBlocks);
 
         let block: PotentialBlock = getTarget(event.pageX, event.pageY, draggedId, newBlocks);
+        console.log(block);
         if (block === null) return;
         let newNewBlocks: Array<PositionedBlock> = [];
         for (let i = 0; i < newBlocks.length; ++i) {
             let result: PotentialBlock = removeBlockById(id, newBlocks[i]);
             if (result !== null) newNewBlocks.push(result as PositionedBlock);
         }
-        console.log(newBlocks);
-        console.log(newNewBlocks);
         let newBlock: Block = {
             id: draggedBlock.id, 
             next: draggedBlock.next, 
@@ -272,7 +274,9 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
             prev.next = block.next;
             block.next = newBlock;
         }
+        console.log(newNewBlocks);
         blockSetter(newNewBlocks);
+        setDragged(false);
         setDraggedId(-1);
     }
 

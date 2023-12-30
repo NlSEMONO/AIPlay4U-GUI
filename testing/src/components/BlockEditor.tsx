@@ -35,14 +35,12 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
             let bodyBlocks = [];
             if (curr.body !== null) {
                 bodyBlocks = createBlock(depth + 1, currY + 16, curr.body);
-                console.log(bodyBlocks);
             }
             sequence = sequence.concat(bodyBlocks);
             currY += 16 + bodyBlocks.length * 16;
             prev = curr;
             curr = curr.next;
         }
-        console.log(sequence);
         return sequence;
     }
 
@@ -53,14 +51,16 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
         let sequence = createBlock(0, 0, curr);
         
         blocksDisplay.push(
-            <div className="relative m-auto w-fit" style={{top: y, left: x, margin: 0}}>
+            <div className="absolute m-auto w-fit" style={{top: y, left: x}}>
                 {sequence}
             </div>
         );
     }
     return (
         <div className={classes}>
-            {blocksDisplay}
+            <div className="relative w-0 h-0"> 
+                {blocksDisplay}
+            </div>
         </div>
     )
 }

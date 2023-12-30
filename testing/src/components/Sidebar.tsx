@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { blockTypes } from "../utils/Constants";
+import { BWIDTH, blockTypes } from "../utils/Constants";
 import { SidebarParams, PositionedBlock, Block } from "../utils/Definitions";
 
 // Sidebar(blocks, blockSetter) returns the sidebar used to add new blocks to
@@ -12,7 +12,7 @@ export default function Sidebar({blocks, blockSetter} : SidebarParams) {
     const handleClick: (a: string) => void = (itm: string) => {
         const copy = copyBlocks(blocks);
         let added: number = 1;
-        let newX: number = (copy.length === 0) ? 0 : copy[copy.length- 1].x + 96;
+        let newX: number = (copy.length === 0) ? 0 : copy[copy.length- 1].x + BWIDTH * 4;
         let newBlock: PositionedBlock = {
             id: ids, x: newX, y: 0, blockType: itm, next: null, code: "", body: null
         };
