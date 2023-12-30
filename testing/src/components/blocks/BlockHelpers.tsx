@@ -31,16 +31,16 @@ const cloneBlocks: (blocks: Array<PositionedBlock>)
     return blocksSoFar;
 }
 
-// cloneBlocks(id, newBlock, blocks) returns a clone of blocks where the block 
-//    associated with id is replaced with newBlock.
+// replaceBlockById(id, newBlock, blocks) returns a clone of blocks where the block 
+//    associated with id is replaced with newBlock. 
 // time: O(n)
-const replaceBlockById: (id: number, newBlock: Block | PositionedBlock | null, blocks: Array<PositionedBlock | Block >) => void = (id, newBlock, blocks) => {
+const replaceBlockById: (id: number, newBlock: Block | PositionedBlock, blocks: Array<PositionedBlock | Block >) => void = (id, newBlock, blocks) => {
     for (let i = 0; i < blocks.length; ++i) {
         let curr: PotentialBlock = blocks[i];
         let prev: PotentialBlock = null;
         while (curr !== null) {
             if (curr.id === id) {
-                if (prev === null && newBlock !== null) {
+                if (prev === null) {
                     newBlock.next = blocks[i].next;
                     blocks[i] = newBlock;
                 }
@@ -114,14 +114,24 @@ const getTarget: (x: number, y: number, draggedId: number, blocks: Array<Positio
 }
 
 // removeBlockById(id, block) removes the block represented by id (if its nested
-//   within block). (will not work if the block is the first node)
+//   within block). Returns null if a block with id is not in block.
 // time: O(n)
-const removeBlockById: (id: number, block: PositionedBlock | Block) => PositionedBlock | Block = (id, block) => {
-    let curr: PotentialBlock = block.next;
-    let prev: PotentialBlock = block;
+const removeBlockById: (id: number, block: PositionedBlock | Block) => PotentialBlock = (id, block) => {
+    let curr: PotentialBlock = block;
+    let prev: PotentialBlock = null;
     while (curr !== null) {
         if (id === curr.id) {
-            prev.next = curr.next;
+            if (prev === null) {
+                return null;
+            }
+            else {
+                prev.next = null;
+                return block;
+            }
+        }
+        if (curr.body !== null) {
+            let bodyRes = removeBlockById(id, curr.body);
+            curr.body = bodyRes;
         }
         prev = curr;
         curr = curr.next;
@@ -189,13 +199,21 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
         }
         // move out of the parent block
         else if (minDiff <= Math.abs(effectiveX - event.clientX) || minDiff <= Math.abs(effectiveY - event.clientY)) {
-            replaceBlockById(id, null, newBlocks);
+            newBlocks = [];
+            for (let i = 0; i < blocks.length; ++i) {
+                let result: PotentialBlock = removeBlockById(id, blocks[i]);
+                if (result !== null) newBlocks.push(result as PositionedBlock);
+            }
+            console.log(newBlocks);
+            // for (let i = 0; i < newBlocks.length; ++i) if (newBlocks[i].id === id) return;
             newBlock = {
                 id: id, x: effectiveX, y: effectiveY, 
                 code: code, next: block.next, body: block.body, 
                 blockType: block.blockType
             }
             newBlocks.push(newBlock);
+            console.log(newBlocks);
+            blockSetter(newBlocks);
         }
     }
 
@@ -204,7 +222,7 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
     }
 
     const onDrop: (event: React.DragEvent) => void = (event) => {
-        console.log("FFFFFFFFFFFFFF");
+        // console.log("FFFFFFFFFFFFFF");
         let newBlocks = cloneBlocks(blocks);
         let draggedBlock = getBlockById(draggedId, newBlocks);
         if (draggedBlock === null) return;
@@ -212,10 +230,13 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
 
         let block: PotentialBlock = getTarget(event.pageX, event.pageY, draggedId, newBlocks);
         if (block === null) return;
-        let newNewBlocks = [];
+        let newNewBlocks: Array<PositionedBlock> = [];
         for (let i = 0; i < newBlocks.length; ++i) {
-            if (id !== newBlocks[i].id) newNewBlocks.push(removeBlockById(draggedId, blocks[i]) as PositionedBlock);
+            let result: PotentialBlock = removeBlockById(id, newBlocks[i]);
+            if (result !== null) newNewBlocks.push(result as PositionedBlock);
         }
+        console.log(newBlocks);
+        console.log(newNewBlocks);
         let newBlock: Block = {
             id: draggedBlock.id, 
             next: draggedBlock.next, 

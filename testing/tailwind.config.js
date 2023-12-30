@@ -8,6 +8,8 @@ export default {
     extend: {
       colors: {
         'if': '#F7B400',
+        'def': '#F0F0F0',
+        'set': '#D9D9D9' 
       },
       spacing: {
         '96': '24rem',

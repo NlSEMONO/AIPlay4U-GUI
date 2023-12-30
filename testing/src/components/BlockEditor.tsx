@@ -1,5 +1,5 @@
 import { DEPTHINC } from "../utils/Constants";
-import { BlockEditorParams, PositionedBlock, Block, isPositionedBlock, BlockParams } from "../utils/Definitions";
+import { BlockEditorParams, PositionedBlock, Block, isPositionedBlock, BlockParams, PotentialBlock } from "../utils/Definitions";
 import { EndBlock, IfBlock } from "./blocks/Blocks";
 import {useState} from 'react';
 
@@ -14,10 +14,11 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
     //   of a sequence of blocks.
     // time: O(n)
     const createBlock: (depth: number, y: number, block: PositionedBlock | Block) => Array<any> = (depth, y, block) => {
-        let curr: PositionedBlock | Block | null = block;
+        let curr: PotentialBlock = block;
         let sequence: Array<any> = [];
         let xCoord = depth * DEPTHINC;
         let currY = y;
+        let prev: PotentialBlock = null;
         while (curr !== null) {
             let params: BlockParams = {
                 id: curr.id, blocks: blocksData, blockSetter: blockSetter,
@@ -29,7 +30,7 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
                 sequence.push(<IfBlock {... params} />);
             } 
             else if (curr.blockType === 'END') {
-                sequence.push(<EndBlock {... params} />);
+                sequence.push(<EndBlock defaultParams={params} prevType={(prev as Block).blockType}/>);
             }
             let bodyBlocks = [];
             if (curr.body !== null) {
@@ -38,6 +39,7 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
             }
             sequence = sequence.concat(bodyBlocks);
             currY += 16 + bodyBlocks.length * 16;
+            prev = curr;
             curr = curr.next;
         }
         console.log(sequence);

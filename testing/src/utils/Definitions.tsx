@@ -31,6 +31,11 @@ export interface BlockParams {
     setDraggedId: (n: number) => void,
 }
 
+export interface EndBlockParams {
+    defaultParams: BlockParams,
+    prevType: string;
+}
+
 export interface SidebarParams {
     blocks: Array<PositionedBlock>,
     blockSetter: (arr: Array<PositionedBlock>) => void
