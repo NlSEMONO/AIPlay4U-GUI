@@ -1,5 +1,5 @@
 import { XOFFSET, BHEIGHT, BWIDTH, DEPTHINC } from "../../utils/Constants";
-import { BlockParams, PositionedBlock, Block, PotentialBlock, isPositionedBlock } from "../../utils/Definitions";
+import { BlockParams, PositionedBlock, Block, PotentialBlock } from "../../utils/Definitions";
 import { useState } from 'react';
 
 // getBlockById(id, blocks) returns the block associated with a given id.
@@ -216,6 +216,7 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
             newBlocks.push(newBlock);
             console.log(newBlocks);
             blockSetter(newBlocks);
+            setDragged(false);
         }
     }
 
@@ -226,17 +227,18 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
     const onDrop: (event: React.DragEvent) => void = (event) => {
         // console.log("FFFFFFFFFFFFFF");
         let newBlocks = cloneBlocks(blocks);
-        let draggedBlock = getBlockById(id, blocks);
+        let draggedBlock = getBlockById(draggedId, blocks);
         if (draggedBlock === null) return;
-        console.log(draggedBlock);
-        console.log(newBlocks);
+        // console.log(id +" " + draggedId);
+        // console.log(draggedBlock);
+        // console.log(newBlocks);
 
         let block: PotentialBlock = getTarget(event.pageX, event.pageY, draggedId, newBlocks);
-        console.log(block);
+        // console.log(block);
         if (block === null) return;
         let newNewBlocks: Array<PositionedBlock> = [];
         for (let i = 0; i < newBlocks.length; ++i) {
-            let result: PotentialBlock = removeBlockById(id, newBlocks[i]);
+            let result: PotentialBlock = removeBlockById(draggedId, newBlocks[i]);
             if (result !== null) newNewBlocks.push(result as PositionedBlock);
         }
         let newBlock: Block = {
