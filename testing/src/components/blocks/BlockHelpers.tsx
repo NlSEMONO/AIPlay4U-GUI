@@ -248,7 +248,7 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
             code: draggedBlock.code,
             blockType: draggedBlock.blockType
         }
-        if (block.blockType === 'IF' || block.blockType === 'WHILE' || block.blockType === 'FOR') {
+        if (block.blockType === 'IF' || block.blockType === 'REPEAT CONDITION' || block.blockType === 'REPEAT TIMES') {
             // console.log('hi');
             // console.log(block);
             if (block.body === null) {

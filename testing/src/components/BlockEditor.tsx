@@ -1,6 +1,6 @@
 import { DEPTHINC } from "../utils/Constants";
 import { BlockEditorParams, PositionedBlock, Block, isPositionedBlock, BlockParams, PotentialBlock } from "../utils/Definitions";
-import { EndBlock, IfBlock } from "./blocks/Blocks";
+import { DefBlock, EndBlock, IfBlock, SetBlock, RTBlock, RCBlock } from "./blocks/Blocks";
 import {useState} from 'react';
 
 // BlockEditor(blocksData, blockSetter) renders the playground in which blocks
@@ -31,6 +31,18 @@ export default function BlockEditor({blocksData, blockSetter} : BlockEditorParam
             } 
             else if (curr.blockType === 'END') {
                 sequence.push(<EndBlock defaultParams={params} prevType={(prev as Block).blockType}/>);
+            }
+            else if (curr.blockType === 'ASSIGN VARIABLE') {
+                sequence.push(<SetBlock {... params} />);
+            }
+            else if (curr.blockType === 'NEW VARIABLE') {
+                sequence.push(<DefBlock {... params} />);
+            }
+            else if (curr.blockType === 'REPEAT TIMES') {
+                sequence.push(<RTBlock {... params} />);
+            }
+            else if (curr.blockType === 'REPEAT CONDITION') {
+                sequence.push(<RCBlock {... params} />);
             }
             let bodyBlocks = [];
             if (curr.body !== null) {

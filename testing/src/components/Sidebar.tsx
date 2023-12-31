@@ -16,7 +16,7 @@ export default function Sidebar({blocks, blockSetter} : SidebarParams) {
         let newBlock: PositionedBlock = {
             id: ids, x: newX, y: 0, blockType: itm, next: null, code: "", body: null
         };
-        if (itm === 'IF' || itm === 'WHILE' || itm === 'FOR') {
+        if (itm === 'IF' || itm === 'REPEAT TIMES' || itm === 'REPEAT CONDITION') {
             let endBlock: Block = {
                 id: ids + 1, blockType: 'END', next: null, code: "", body: null
             }
@@ -29,7 +29,7 @@ export default function Sidebar({blocks, blockSetter} : SidebarParams) {
     }
 
     const createBlockButtons = blockTypes.map((itm) => {
-        return (<button className="w-60 text-xl my-4" onClick={() => { handleClick(itm); console.log(blocks)}}>
+        return ((itm === 'END') ? null : <button className="w-60 text-xl my-4" onClick={() => { handleClick(itm); console.log(blocks)}}>
                 {itm}
                 </button>);
     });
