@@ -4,8 +4,7 @@ import { useState } from 'react';
 
 // getBlockById(id, blocks) returns the block associated with a given id.
 // time: O(n)
-const getBlockById: (id: number, blocks: Array<PositionedBlock | Block >) 
-                                        => PotentialBlock = (id, blocks) => {
+function getBlockById(id: number, blocks: Array<PositionedBlock | Block >): PotentialBlock {
     for (let i = 0; i < blocks.length; ++i) {
         let curr: PotentialBlock = blocks[i];
         while (curr !== null) {
@@ -295,3 +294,7 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
         }
     );
 }
+
+// export helper functions to test them
+module.exports = { getBlockById, cloneBlocks, replaceBlockById, getParent,
+                    getTarget, removeBlockById }
