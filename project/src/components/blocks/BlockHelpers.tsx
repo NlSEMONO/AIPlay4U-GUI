@@ -296,5 +296,5 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
 }
 
 // export helper functions to test them
-// module.exports = { getBlockById, cloneBlocks, replaceBlockById, getParent,
-//                     getTarget, removeBlockById }
+module.exports = { getBlockById, cloneBlocks, replaceBlockById, getParent,
+                    getTarget, removeBlockById }

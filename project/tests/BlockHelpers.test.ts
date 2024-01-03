@@ -5,6 +5,10 @@ const { getBlockById, cloneBlocks, replaceBlockById, removeBlockById } = require
 // getBlockById
 // *******************************
 
+const set_simple: PositionedBlock = {
+    id: 99, x: 100, y: 200, body: null, next: null, code: "", blockType: "ASSIGN VARIABLE"
+}
+
 const if_simple: PositionedBlock = {
     id: 0,
     x: 0,
@@ -167,13 +171,35 @@ test("TEST REMOVE BY ID SIMPLE", () =>{
 }); 
 
 test("TEST REMOVE BY ID NESTED", () =>{
-    expect(removeBlockById(0, if_nested_1)).toBe(null);
+    let test1_in = set_simple;
+    let test1_sub = if_simple;
+    test1_sub.body = times_nested_1;
+    test1_in.next = test1_sub;
+    let test1_out = set_simple;
+    let test1_out_sub = if_simple;
+    test1_out_sub.next = null;
+    test1_out.next = test1_out_sub;
+    expect(removeBlockById(1, test1_in)).toStrictEqual(test1_out);
+    
+    let test2_in = set_simple;
+    let test2_sub = if_simple;
+    test2_sub.body = times_nested_1;
+    test2_in.next = test2_sub;
+    let test2_out = set_simple;
+    test2_out.next = if_simple;
+    expect(removeBlockById(2, test2_in)).toStrictEqual(test2_out);
 
-    let test2_out = if_nested_1;
-    test2_out.body = null;
-    expect(removeBlockById(5, if_nested_1)).toStrictEqual(test2_out);
+    let test3_in = if_simple;
+    test3_in.body = times_nested_1;
+    let test3_out = if_simple;
+    let test3_sub = times_nested_1;
+    test3_sub.body = null;
+    expect(removeBlockById(4, test3_in)).toStrictEqual(test3_out);
 
-    let test3_out = if_nested_1;
-    test3_out.next = null;
-    expect(removeBlockById(1, if_nested_1)).toStrictEqual(test2_out);
+    let test4_in = if_simple;
+    test4_in.body = times_nested_1;
+    let test4_out = if_simple;
+    let test4_sub = times_nested_1;
+    test4_sub.next = null;
+    expect(removeBlockById(3, test4_in)).toStrictEqual(test4_out);
 }); 
