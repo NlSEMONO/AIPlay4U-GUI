@@ -31,7 +31,7 @@ const cloneBlocks: (blocks: Array<PositionedBlock>)
 }
 
 // replaceBlockById(id, newBlock, blocks) returns a clone of blocks where the block 
-//    associated with id is replaced with newBlock. 
+//    associated with id is replaced with newBlock. [only works with parent blocks]
 // time: O(n)
 const replaceBlockById: (id: number, newBlock: Block | PositionedBlock, blocks: Array<PositionedBlock | Block >) => void = (id, newBlock, blocks) => {
     for (let i = 0; i < blocks.length; ++i) {
@@ -296,5 +296,5 @@ export const useBlock = ({id, isParent, blocks, blockSetter, x, y, code, dragged
 }
 
 // export helper functions to test them
-module.exports = { getBlockById, cloneBlocks, replaceBlockById, getParent,
-                    getTarget, removeBlockById }
+// module.exports = { getBlockById, cloneBlocks, replaceBlockById, getParent,
+//                     getTarget, removeBlockById }

@@ -1,11 +1,11 @@
-const { getBlockById, cloneBlocks, replaceBlockById, getParent,
-    getTarget, removeBlockById } = require("./BlockHelpers.tsx");
+import { PositionedBlock } from "../src/utils/Definitions";
+const { getBlockById, cloneBlocks, replaceBlockById, removeBlockById } = require("../src/components/blocks/BlockHelpers.tsx");
 
 // *******************************
 // getBlockById
 // *******************************
 
-const if_simple = {
+const if_simple: PositionedBlock = {
     id: 0,
     x: 0,
     y: 0,
@@ -29,7 +29,7 @@ test("GET BLOCK BY ID SIMPLE", () =>{
     expect(getBlockById(-1, inputArr)).toBe(null);
 });
 
-const if_nested_1 = {
+const if_nested_1: PositionedBlock = {
     id: 0,
     x: 0,
     y: 0,
@@ -51,7 +51,7 @@ const if_nested_1 = {
     code: "",
 }
 
-const times_nested_1 = {
+const times_nested_1: PositionedBlock = {
     id: 2,
     x: 0,
     y: 0,
@@ -114,3 +114,66 @@ test("GET BLOCK BY ID NESTED 2", () =>{
     expect(getBlockById(13, inputArr)).toBe(times_nested_2.next.next.body.next);
     expect(getBlockById(8, inputArr)).toBe(times_nested_2.next.next.next);
 });
+
+// *******************************
+// cloneBlocks
+// *******************************
+
+test("TEST CLONE GENERAL", () =>{
+    let inputArr1 = [ if_nested_1, times_nested_2 ];
+    let inputArr2 = [ times_nested_2, if_nested_1 ];
+    let inputArr3 = [ times_nested_1, if_nested_1 ];
+
+    expect(cloneBlocks(inputArr1)).toStrictEqual(inputArr1);
+    expect(cloneBlocks(inputArr2)).toStrictEqual(inputArr2);
+    expect(cloneBlocks(inputArr3)).toStrictEqual(inputArr3);
+});
+
+// *******************************
+// replaceBlockById
+// *******************************
+
+test("TEST REPLACE GENERAL", () =>{
+    let inputArr1 = [ if_nested_1, times_nested_2 ];
+    let if_nested_mod = if_nested_1;
+    if_nested_1.x = 10;
+    let times_nested_2_mod = times_nested_2;
+    times_nested_2_mod.x = 10;
+    times_nested_2_mod.y = 20;
+
+    replaceBlockById(0, if_nested_mod, inputArr1);
+    let test1_out = [if_nested_mod, times_nested_2];
+    expect(inputArr1).toStrictEqual(test1_out);
+
+    replaceBlockById(2, times_nested_2_mod, inputArr1)
+    let test2_out = [if_nested_mod, times_nested_2_mod];
+    expect(inputArr1).toStrictEqual(test2_out);
+});
+
+// *******************************
+// removeBlockById
+// *******************************
+
+test("TEST REMOVE BY ID SIMPLE", () =>{
+    expect(removeBlockById(0, if_nested_1)).toBe(null);
+
+    let test2_out = if_nested_1;
+    test2_out.body = null;
+    expect(removeBlockById(5, if_nested_1)).toStrictEqual(test2_out);
+
+    let test3_out = if_nested_1;
+    test3_out.next = null;
+    expect(removeBlockById(1, if_nested_1)).toStrictEqual(test2_out);
+}); 
+
+test("TEST REMOVE BY ID NESTED", () =>{
+    expect(removeBlockById(0, if_nested_1)).toBe(null);
+
+    let test2_out = if_nested_1;
+    test2_out.body = null;
+    expect(removeBlockById(5, if_nested_1)).toStrictEqual(test2_out);
+
+    let test3_out = if_nested_1;
+    test3_out.next = null;
+    expect(removeBlockById(1, if_nested_1)).toStrictEqual(test2_out);
+}); 
